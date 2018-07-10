@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="cate">
+	<!-- 카테고리저장 -->
+	<insert id="insert" parameterType="com.story.blogger.model.category.dto.CategoryDTO">
+		<selectKey keyProperty="cateno" resultType="int" order="BEFORE">
+			select seq_category_no.nextval from dual
+		</selectKey>
+			insert into category
+			values(#{cateno}, 
+			       #{userid},
+			       #{catename}, 
+			       #{description},
+			       sysdate
+			)
+	</insert>
+	
+		<!-- 특정카테고리 정보를 가져온다 -->
+	<select id="selectCate" parameterType="int" resultType="com.story.blogger.model.category.dto.CategoryDTO">
+			select cateno, userid, catename, description, regdate
+			from category
+			where cateno =#{cateno}
+	</select>
+	
+	<!-- 회원번호로 가테고리리스트 가져오기 (포스트 갯수도 같이 가져옴)-->
+	<select id="selectList" parameterType="string" resultType="com.story.blogger.model.category.dto.CategoryDTO">
+			select c.cateno, c.userid, c.catename, c.description, c.regdate, p.cnt
+			from category c, 
+     			 (select cateno, count(*) cnt
+      			  from post
+      			  group by cateno) p
+			where userid = #{userid}
+		    and c.cateno = p.cateno(+)
+			order by cateno desc
+	</select>
+	
+	
+	<!-- 카테고리삭제 -->
+	<delete id="deleteCate" parameterType="int" >
+			delete from category
+			where cateno =#{cateno}
+	</delete>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

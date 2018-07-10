@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="post" >
+	<!-- 새로운 첨부파일 추가 -->	
+	<insert id="updateAttach">
+		insert into attach (fullname, postno) values
+		( #{fullname}, #{postno} )
+	</insert>
+
+	<!-- 게시물 내용 수정 -->
+	<update id="update">
+		update post
+		set cateno=#{cateno}, title=#{title}, postcontent=#{postcontent}
+		where postno=#{postno}
+	</update>
+	
+	<!-- 첨부파일 레코드 삭제 -->
+	<delete id="deleteFile">
+		delete from attach where fullname=#{fullname}
+	</delete>
+	
+	<delete id="delete">
+ 		update post set show='N' where postno=#{postno} 
+	</delete> 
+
+	<!-- 첨부파일 목록 -->
+ 	<select id="getAttach" 	resultType="String">
+		select fullname 
+		from attach
+		where postno=#{postno}
+		order by regdate desc	
+	</select> 	
+
+	<select id="listAll" resultType="com.story.blogger.model.post.dto.PostDTO">
+		<include refid="paging_header" />
+			select postno,title,writer,name,regdate,viewcnt,show					
+			from post p, users u
+			<include refid="search" />
+			order by postno desc   
+		<include refid="paging_footer" />
+	</select>
+	<sql id="paging_header">
+		select *
+		from (
+		    select rownum as rn, A.*
+		    from (	
+	</sql>
+	<sql id="paging_footer">
+		    ) A
+		) where rn between #{start} and #{end}	
+	</sql>
+
+	<!-- 레코드 갯수 계산 -->	
+	<select id="countArticle" resultType="int">
+		select count(*)
+		from post p, users u	
+		<include refid="search" />
+	</select>
+
+	<sql id="search">
+		<choose>
+			<when test="search_option != 'all' ">
+				where p.writer=u.userid 
+				    and show='Y'
+				    and ${search_option} like #{keyword}			
+			</when>
+			<otherwise>
+				where p.writer=u.userid 
+				and show='Y'
+				and (name like #{keyword} 
+				or title like #{keyword}
+				or postcontent like #{keyword} )			
+			</otherwise>
+		</choose>
+	</sql>
+
+	<!--글 등록  -->
+	<insert id="insertPost" parameterType="com.story.blogger.model.post.dto.PostDTO">
+	insert into post(postno, cateno, title, postcontent, regdate, writer)
+	values(seq_post_no.nextval, #{cateno}, #{title}, #{postcontent}, sysdate, #{writer})
+	</insert>
+
+	<!-- 첨부파일 정보 저장 -->	
+	<insert id="addAttach">
+		insert into attach (fullname, postno) values
+		( #{fullname}, seq_post_no.currval ) 
+	</insert>
+	
+	<!-- 조회수 증가 처리 -->
+	<update id="increaseViewcnt">
+		update post set viewcnt=viewcnt+1
+		where postno=#{postno}
+	</update> 
+	
+	<select id="read" resultType="com.story.blogger.model.post.dto.PostDTO">
+		select postno, title, regdate, postcontent, viewcnt, name, writer 
+		from post p, users u
+		where p.writer=u.userid and postno=#{postno}	
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

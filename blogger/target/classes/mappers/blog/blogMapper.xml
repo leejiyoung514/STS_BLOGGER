@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="blog">
+	<!-- 블로그정보저장 -->
+	<insert id="insertBlog" parameterType="com.story.blogger.model.blog.dto.BlogDTO">
+		insert into blog
+		values(seq_blog_no.nextval,
+			   #{userid}, 
+			   #{blogtitle}, 
+			   #{blogcontent},
+			   #{logofile},
+			   sysdate
+			)
+	</insert>
+	
+	<!-- 블로그정보 가졍오기 -->
+	<select id="selectBlogById" parameterType="string" resultType="com.story.blogger.model.blog.dto.BlogDTO">
+			select u.userid, b.blogtitle, b.logofile, b.blogcontent
+			  from users u, blog b
+			 where u.userid = b.userid
+			   and b.userid = #{userid}      
+	</select>
+	
+	<!-- 블로그 기본설정페이지 수정 -->
+	<!-- 첨부파일은 변동사항이 있을때만 업데이트 -->
+	<select id="updateBlog" parameterType="com.story.blogger.model.blog.dto.BlogDTO">
+			update blog
+			set blogtitle = #{blogtitle},
+			<if test="logofile !=null and logofile !='' ">
+			    logoFile = #{logofile},
+			</if>
+			blogcontent = #{blogcontent}	
+			where userid = #{userid}
+	</select> 
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
